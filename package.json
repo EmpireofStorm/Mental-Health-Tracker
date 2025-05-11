@@ -1,0 +1,26 @@
+{
+  "name": "mental-health-tracker",
+  "version": "1.0.0",
+  "description": "A responsive web application for tracking mental health and daily mood",
+  "main": "index.js",
+  "scripts": {
+    "start": "live-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mental-health",
+    "tracker",
+    "journal",
+    "mood",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.8.0",
+    "chart.js": "^4.4.1"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+} 
