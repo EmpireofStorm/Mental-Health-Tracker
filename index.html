@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your mental health, mood, and daily reflections">
+    <title>Mental Health Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <nav class="nav-container">
+            <h1>Mental Health Tracker</h1>
+            <div class="nav-links">
+                <button id="loginBtn" class="btn">Login</button>
+                <button id="signupBtn" class="btn">Sign Up</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="auth-section" class="auth-container">
+            <!-- Login/Signup forms will be dynamically inserted here -->
+        </section>
+
+        <section id="dashboard" class="dashboard hidden">
+            <article class="mood-tracker">
+                <h2>How are you feeling today?</h2>
+                <div class="mood-selector">
+                    <button class="mood-btn" data-mood="very-happy" aria-label="Very Happy">😊</button>
+                    <button class="mood-btn" data-mood="happy" aria-label="Happy">🙂</button>
+                    <button class="mood-btn" data-mood="neutral" aria-label="Neutral">😐</button>
+                    <button class="mood-btn" data-mood="sad" aria-label="Sad">🙁</button>
+                    <button class="mood-btn" data-mood="very-sad" aria-label="Very Sad">😢</button>
+                </div>
+            </article>
+
+            <article class="journal-entry">
+                <h2>Journal Your Thoughts</h2>
+                <form id="journalForm">
+                    <div class="form-group">
+                        <label for="journalText">How are you feeling today?</label>
+                        <textarea id="journalText" name="journalText" rows="4" required
+                            placeholder="Write your thoughts here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sleepHours">Hours of Sleep</label>
+                        <input type="number" id="sleepHours" name="sleepHours" min="0" max="24" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="stressLevel">Stress Level (1-10)</label>
+                        <input type="range" id="stressLevel" name="stressLevel" min="1" max="10" value="5">
+                        <span id="stressValue">5</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                </form>
+            </article>
+
+            <article class="mood-history">
+                <h2>Your Mood History</h2>
+                <div class="chart-container">
+                    <canvas id="moodChart"></canvas>
+                </div>
+                <div id="entriesList" class="entries-list">
+                    <!-- Entries will be dynamically inserted here -->
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mental Health Tracker. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/mood-tracker.js"></script>
+    <script src="js/journal.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
