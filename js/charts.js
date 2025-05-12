@@ -1,18 +1,26 @@
+import { auth, db } from './config.js';
+
 class Charts {
     constructor() {
-        this.db = window.db;
-        this.auth = window.auth;
+        this.db = db;
+        this.auth = auth;
         this.moodChart = null;
-        this.setupCharts();
+        if (document.getElementById('moodChart')) {
+            this.setupCharts();
+        }
     }
 
     setupCharts() {
-        this.createMoodChart();
+        if (document.getElementById('moodChart')) {
+            this.createMoodChart();
+        }
         this.updateCharts();
     }
 
     createMoodChart() {
-        const ctx = document.getElementById('moodChart').getContext('2d');
+        const ctx = document.getElementById('moodChart');
+        if (!ctx) return;
+
         this.moodChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -127,5 +135,7 @@ class Charts {
     }
 }
 
-// Initialize charts
-const charts = new Charts(); 
+// Initialize charts only if we're on a page with charts
+if (document.getElementById('moodChart')) {
+    const charts = new Charts();
+} 
