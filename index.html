@@ -7,65 +7,73 @@
     <title>Mental Health Tracker</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Initialization -->
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "mental-health-tracker-cd9a5.firebaseapp.com",
+            projectId: "mental-health-tracker-cd9a5",
+            storageBucket: "mental-health-tracker-cd9a5.firebasestorage.app",
+            messagingSenderId: "224277082219",
+            appId: "1:224277082219:web:1b2071d0bf6b407d7bc12e",
+            measurementId: "G-TW1JWRGRZ6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Make Firebase services available globally
+        window.auth = firebase.auth();
+        window.db = firebase.firestore();
+    </script>
 </head>
 <body>
-    <header class="main-header">
-        <nav class="nav-container">
-            <h1>Mental Health Tracker</h1>
+    <header>
+        <nav>
+            <div class="logo">Mental Health Tracker</div>
             <div class="nav-links">
-                <button id="loginBtn" class="btn">Login</button>
-                <button id="signupBtn" class="btn">Sign Up</button>
+                <div id="authSection" class="auth-buttons">
+                    <button id="loginBtn" class="btn">Login</button>
+                    <button id="signupBtn" class="btn">Sign Up</button>
+                </div>
+                <div id="userSection" class="user-info" style="display: none;">
+                    <span id="userEmail"></span>
+                    <button id="logoutBtn" class="btn">Logout</button>
+                </div>
             </div>
         </nav>
     </header>
 
     <main>
-        <section id="auth-section" class="auth-container">
-            <!-- Login/Signup forms will be dynamically inserted here -->
+        <section class="hero">
+            <h1>Track Your Mental Health Journey</h1>
+            <p>A safe space to monitor your mood, journal your thoughts, and track your progress.</p>
+            <button id="getStartedBtn" class="btn btn-primary">Get Started</button>
         </section>
 
-        <section id="dashboard" class="dashboard hidden">
-            <article class="mood-tracker">
-                <h2>How are you feeling today?</h2>
-                <div class="mood-selector">
-                    <button class="mood-btn" data-mood="very-happy" aria-label="Very Happy">😊</button>
-                    <button class="mood-btn" data-mood="happy" aria-label="Happy">🙂</button>
-                    <button class="mood-btn" data-mood="neutral" aria-label="Neutral">😐</button>
-                    <button class="mood-btn" data-mood="sad" aria-label="Sad">🙁</button>
-                    <button class="mood-btn" data-mood="very-sad" aria-label="Very Sad">😢</button>
+        <section class="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Mood Tracking</h3>
+                    <p>Record and visualize your daily mood patterns</p>
                 </div>
-            </article>
-
-            <article class="journal-entry">
-                <h2>Journal Your Thoughts</h2>
-                <form id="journalForm">
-                    <div class="form-group">
-                        <label for="journalText">How are you feeling today?</label>
-                        <textarea id="journalText" name="journalText" rows="4" required
-                            placeholder="Write your thoughts here..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="sleepHours">Hours of Sleep</label>
-                        <input type="number" id="sleepHours" name="sleepHours" min="0" max="24" step="0.5">
-                    </div>
-                    <div class="form-group">
-                        <label for="stressLevel">Stress Level (1-10)</label>
-                        <input type="range" id="stressLevel" name="stressLevel" min="1" max="10" value="5">
-                        <span id="stressValue">5</span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save Entry</button>
-                </form>
-            </article>
-
-            <article class="mood-history">
-                <h2>Your Mood History</h2>
-                <div class="chart-container">
-                    <canvas id="moodChart"></canvas>
+                <div class="feature-card">
+                    <h3>Journaling</h3>
+                    <p>Express your thoughts and feelings in a private space</p>
                 </div>
-                <div id="entriesList" class="entries-list">
-                    <!-- Entries will be dynamically inserted here -->
+                <div class="feature-card">
+                    <h3>Progress Analytics</h3>
+                    <p>View insights and trends in your mental health journey</p>
                 </div>
-            </article>
+            </div>
         </section>
     </main>
 
@@ -73,20 +81,127 @@
         <p>&copy; 2024 Mental Health Tracker. All rights reserved.</p>
     </footer>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
+    <!-- Auth Forms -->
+    <div id="authForms" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="loginForm" class="auth-form">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="auth-switch">Don't have an account? <a href="#" id="switchToSignup">Sign up</a></p>
+            </form>
+
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <h2>Sign Up</h2>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+                <p class="auth-switch">Already have an account? <a href="#" id="switchToLogin">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-content">
+            <h2>🎉 Welcome to Mental Health Tracker!</h2>
+            <p>Your account has been created successfully.</p>
+            <p>You'll be redirected to your dashboard in a moment...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/mood-tracker.js"></script>
-    <script src="js/journal.js"></script>
-    <script src="js/charts.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/mood-tracker.js"></script>
+    <script type="module" src="js/journal.js"></script>
+    <script type="module" src="js/charts.js"></script>
+    <script type="module" src="js/app.js"></script>
+
+    <!-- Debug Script -->
+    <script>
+        // Add click event listeners to all buttons for debugging
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    console.log('Button clicked:', e.target.id || e.target.className);
+                });
+            });
+
+            // Show auth modal when Get Started is clicked
+            const getStartedBtn = document.getElementById('getStartedBtn');
+            const authForms = document.getElementById('authForms');
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const closeBtn = document.querySelector('.close');
+            const switchToSignup = document.getElementById('switchToSignup');
+            const switchToLogin = document.getElementById('switchToLogin');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            getStartedBtn.addEventListener('click', () => {
+                authForms.style.display = 'block';
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            });
+
+            loginBtn.addEventListener('click', () => {
+                authForms.style.display = 'block';
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            });
+
+            signupBtn.addEventListener('click', () => {
+                authForms.style.display = 'block';
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            });
+
+            closeBtn.addEventListener('click', () => {
+                authForms.style.display = 'none';
+            });
+
+            switchToSignup.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            });
+
+            switchToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === authForms) {
+                    authForms.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html> 

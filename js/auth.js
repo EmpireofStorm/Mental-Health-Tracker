@@ -1,167 +1,136 @@
 class Auth {
     constructor() {
+        console.log('Auth class initialized');
         this.auth = window.auth;
-        this.db = window.db;
         this.setupAuthListeners();
-        this.setupAuthUI();
+        this.setupAuthForms();
     }
 
     setupAuthListeners() {
-        this.auth.onAuthStateChanged(user => {
+        console.log('Setting up auth listeners');
+        this.auth.onAuthStateChanged((user) => {
+            console.log('Auth state changed:', user ? 'logged in' : 'logged out');
             if (user) {
-                this.onUserSignedIn(user);
-            } else {
-                this.onUserSignedOut();
+                console.log('User details:', user.email);
             }
+            this.updateUI(user);
         });
     }
 
-    setupAuthUI() {
-        const authSection = document.getElementById('auth-section');
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
+    setupAuthForms() {
+        console.log('Setting up auth forms');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
 
-        loginBtn.addEventListener('click', () => this.showLoginForm());
-        signupBtn.addEventListener('click', () => this.showSignupForm());
+        if (loginForm) {
+            console.log('Login form found, adding submit listener');
+            loginForm.addEventListener('submit', (e) => {
+                console.log('Login form submitted');
+                this.handleLogin(e);
+            });
+        } else {
+            console.error('Login form not found');
+        }
 
-        // Create auth forms
-        this.createAuthForms(authSection);
-    }
+        if (registerForm) {
+            console.log('Register form found, adding submit listener');
+            registerForm.addEventListener('submit', (e) => {
+                console.log('Register form submitted');
+                this.handleRegister(e);
+            });
+        } else {
+            console.error('Register form not found');
+        }
 
-    createAuthForms(container) {
-        // Login Form
-        const loginForm = document.createElement('form');
-        loginForm.id = 'loginForm';
-        loginForm.className = 'auth-form hidden';
-        loginForm.innerHTML = `
-            <h2>Login</h2>
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required>
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-            <p class="auth-switch">Don't have an account? <a href="#" id="switchToSignup">Sign up</a></p>
-        `;
-
-        // Signup Form
-        const signupForm = document.createElement('form');
-        signupForm.id = 'signupForm';
-        signupForm.className = 'auth-form hidden';
-        signupForm.innerHTML = `
-            <h2>Sign Up</h2>
-            <div class="form-group">
-                <label for="signupEmail">Email</label>
-                <input type="email" id="signupEmail" required>
-            </div>
-            <div class="form-group">
-                <label for="signupPassword">Password</label>
-                <input type="password" id="signupPassword" required>
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
-            <p class="auth-switch">Already have an account? <a href="#" id="switchToLogin">Login</a></p>
-        `;
-
-        container.appendChild(loginForm);
-        container.appendChild(signupForm);
-
-        // Add event listeners
-        loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        signupForm.addEventListener('submit', (e) => this.handleSignup(e));
-        document.getElementById('switchToSignup').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showSignupForm();
-        });
-        document.getElementById('switchToLogin').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showLoginForm();
-        });
-    }
-
-    showLoginForm() {
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('signupForm').classList.add('hidden');
-    }
-
-    showSignupForm() {
-        document.getElementById('signupForm').classList.remove('hidden');
-        document.getElementById('loginForm').classList.add('hidden');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            console.log('Logout button found, adding click listener');
+            logoutBtn.addEventListener('click', () => {
+                console.log('Logout button clicked');
+                this.handleLogout();
+            });
+        } else {
+            console.error('Logout button not found');
+        }
     }
 
     async handleLogin(e) {
         e.preventDefault();
+        console.log('Handling login');
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
+        console.log('Attempting login with email:', email);
 
         try {
-            await this.auth.signInWithEmailAndPassword(email, password);
-            this.showToast('Successfully logged in!', 'success');
+            const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
+            console.log('Login successful:', userCredential.user.email);
+            this.showToast('Logged in successfully!', 'success');
+            window.location.href = '/dashboard.html';
         } catch (error) {
-            this.showToast(error.message, 'error');
+            console.error('Login error:', error.code, error.message);
+            this.showToast(this.getErrorMessage(error.code), 'error');
         }
     }
 
-    async handleSignup(e) {
+    async handleRegister(e) {
         e.preventDefault();
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
+        console.log('Handling registration');
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        console.log('Attempting registration with email:', email);
 
         if (password !== confirmPassword) {
-            this.showToast('Passwords do not match!', 'error');
+            console.error('Passwords do not match');
+            this.showToast('Passwords do not match', 'error');
             return;
         }
 
         try {
             const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-            await this.createUserProfile(userCredential.user);
+            console.log('Registration successful:', userCredential.user.email);
             this.showToast('Account created successfully!', 'success');
+            window.location.href = '/dashboard.html';
         } catch (error) {
-            this.showToast(error.message, 'error');
+            console.error('Registration error:', error.code, error.message);
+            this.showToast(this.getErrorMessage(error.code), 'error');
         }
     }
 
-    async createUserProfile(user) {
-        await this.db.collection('users').doc(user.uid).set({
-            email: user.email,
-            createdAt: new Date(),
-            lastLogin: new Date()
-        });
-    }
-
-    async signOut() {
+    async handleLogout() {
         try {
             await this.auth.signOut();
-            this.showToast('Successfully logged out!', 'success');
+            this.showToast('Logged out successfully', 'success');
+            window.location.href = '/index.html';
         } catch (error) {
-            this.showToast(error.message, 'error');
+            this.showToast(this.getErrorMessage(error.code), 'error');
         }
     }
 
-    onUserSignedIn(user) {
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.querySelector('.nav-links').innerHTML = `
-            <button id="logoutBtn" class="btn">Logout</button>
-        `;
-        document.getElementById('logoutBtn').addEventListener('click', () => this.signOut());
-    }
+    updateUI(user) {
+        console.log('Updating UI for user:', user ? user.email : 'no user');
+        const authSection = document.getElementById('authSection');
+        const userSection = document.getElementById('userSection');
+        const userEmail = document.getElementById('userEmail');
 
-    onUserSignedOut() {
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('hidden');
-        document.querySelector('.nav-links').innerHTML = `
-            <button id="loginBtn" class="btn">Login</button>
-            <button id="signupBtn" class="btn">Sign Up</button>
-        `;
-        this.setupAuthUI();
+        if (user) {
+            console.log('User is logged in, hiding auth section');
+            if (authSection) {
+                authSection.classList.add('hidden');
+            }
+            if (userSection) {
+                userSection.classList.remove('hidden');
+                if (userEmail) userEmail.textContent = user.email;
+            }
+        } else {
+            console.log('User is logged out, showing auth section');
+            if (authSection) {
+                authSection.classList.remove('hidden');
+            }
+            if (userSection) {
+                userSection.classList.add('hidden');
+            }
+        }
     }
 
     showToast(message, type) {
@@ -174,7 +143,22 @@ class Auth {
             toast.remove();
         }, 3000);
     }
+
+    getErrorMessage(errorCode) {
+        const errorMessages = {
+            'auth/email-already-in-use': 'This email is already registered',
+            'auth/invalid-email': 'Invalid email address',
+            'auth/operation-not-allowed': 'Operation not allowed',
+            'auth/weak-password': 'Password is too weak',
+            'auth/user-disabled': 'This account has been disabled',
+            'auth/user-not-found': 'No account found with this email',
+            'auth/wrong-password': 'Incorrect password',
+            'auth/too-many-requests': 'Too many failed attempts. Please try again later'
+        };
+        return errorMessages[errorCode] || 'An error occurred';
+    }
 }
 
 // Initialize auth
-const auth = new Auth(); 
+console.log('Initializing auth manager');
+const authManager = new Auth(); 
