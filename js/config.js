@@ -1,11 +1,11 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "",
+  authDomain: "mental-health-tracker-cd9a5.firebaseapp.com",
+  projectId: "mental-health-tracker-cd9a5",
+  storageBucket: "mental-health-tracker-cd9a5.firebasestorage.app",
+  messagingSenderId: "224277082219",
+  appId: "1:224277082219:web:1b2071d0bf6b407d7bc12e",
   measurementId: "G-TW1JWRGRZ6"
 };
 
