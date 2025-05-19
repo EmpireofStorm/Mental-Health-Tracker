@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Mental Health Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Mental Health Tracker</div>
+            <div class="nav-links">
+                <div id="userSection">
+                    <span id="userEmail"></span>
+                    <!-- Account link will go here -->
+                    <button id="logoutBtn" class="btn">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="account-settings">
+            <h2>Account Settings</h2>
+            
+            <article class="settings-card">
+                <h3>Change Email</h3>
+                <form id="changeEmailForm">
+                    <div class="form-group">
+                        <label for="newEmail">New Email:</label>
+                        <input type="email" id="newEmail" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="currentPasswordForEmail">Current Password:</label>
+                        <input type="password" id="currentPasswordForEmail" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Email</button>
+                </form>
+            </article>
+
+            <article class="settings-card">
+                <h3>Change Password</h3>
+                <form id="changePasswordForm">
+                     <div class="form-group">
+                        <label for="currentPasswordForPassword">Current Password:</label>
+                        <input type="password" id="currentPasswordForPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirm New Password:</label>
+                        <input type="password" id="confirmNewPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </article>
+        </section>
+    </main>
+
+     <footer>
+        <p>&copy; 2024 Mental Health Tracker. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/account.js"></script>
+    <script>
+        // Initialize Account class on this page
+        const account = new Account();
+         // The auth instance should be available from auth.js
+    </script>
+</body>
+</html> 

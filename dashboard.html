@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Mental Health Tracker</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -13,6 +14,7 @@
             <div class="nav-links">
                 <div id="userSection">
                     <span id="userEmail"></span>
+                    <a href="account.html" class="btn">Account</a>
                     <button id="logoutBtn" class="btn">Logout</button>
                 </div>
             </div>
@@ -24,6 +26,10 @@
             <article class="mood-tracker">
                 <h2>How are you feeling today?</h2>
                 <form id="moodForm">
+                    <div class="form-group">
+                        <label for="moodTitle">Title:</label>
+                        <input type="text" id="moodTitle" placeholder="Give this entry a title">
+                    </div>
                     <div class="form-group">
                         <label for="mood">Select your mood:</label>
                         <select id="mood" required>
@@ -83,6 +89,26 @@
                 </form>
             </article>
 
+            <article id="therapistSection" class="therapist-section">
+                 <div class="therapist-container">
+                    <div class="therapist-header">
+                        <h2>AI Therapist</h2>
+                    </div>
+                    <div id="chatBox" class="therapist-chat-box">
+                        <div id="chatHistory" class="therapist-chat-history">
+                            <!-- Chat messages will go here -->
+                            <div class="therapist-message initial-message">
+                                <p>Hello! I'm your AI therapist. You can ask me anything about your mood and journal entries, or just chat about how you're feeling.</p>
+                            </div>
+                        </div>
+                        <div class="therapist-chat-input">
+                            <input type="text" id="chatInput" placeholder="Type your message...">
+                            <button id="sendMessageBtn" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
             <article class="mood-history">
                 <h2>Your Mood History</h2>
                 <div class="chart-container">
@@ -132,5 +158,12 @@
     <script src="js/auth.js"></script>
     <script src="js/mood-tracker.js"></script>
     <script src="js/journal.js"></script>
+    <script src="js/therapist.js"></script>
+    <script>
+        // Initialize components
+        const moodTracker = new MoodTracker();
+        const journal = new Journal();
+        const therapist = new Therapist();
+    </script>
 </body>
 </html> 

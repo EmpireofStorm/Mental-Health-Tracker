@@ -41,20 +41,22 @@ class Journal {
             text: document.getElementById('journalText').value,
             sleepHours: parseFloat(document.getElementById('sleepHours').value),
             stressLevel: parseInt(document.getElementById('stressLevel').value),
-            timestamp: new Date().toISOString(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             userId: this.auth.currentUser.uid
         };
+
+        console.log('Attempting to save journal entry:', entry);
 
         try {
             if (editId) {
                 // Update existing entry
                 await this.db.collection('journal_entries').doc(editId).update(entry);
-                this.showToast('Entry updated successfully', 'success');
+                this.showToast('Entry updated successfully!', 'success', 700);
                 delete form.dataset.editId;
             } else {
                 // Create new entry
                 await this.db.collection('journal_entries').add(entry);
-                this.showToast('Entry saved successfully', 'success');
+                this.showToast('Journal entry saved successfully!', 'success', 700);
             }
 
             form.reset();
@@ -111,7 +113,7 @@ class Journal {
         }
     }
 
-    showToast(message, type) {
+    showToast(message, type, delay = 3000) {
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
@@ -119,19 +121,28 @@ class Journal {
 
         setTimeout(() => {
             toast.remove();
-        }, 3000);
+        }, delay);
     }
 
     formatDate(date) {
         if (!date) return 'N/A';
-        
-        // Handle Firestore Timestamp
-        if (date.toDate) {
+
+        // Handle Firestore Timestamp objects or similar structures
+        if (typeof date.toDate === 'function') {
             date = date.toDate();
         }
-        // Handle ISO string
+        // Handle cases where it might be a Firebase server timestamp object with seconds
+        else if (date.seconds !== undefined) {
+             date = new Date(date.seconds * 1000);
+        }
+        // Handle ISO string or other date string formats
         else if (typeof date === 'string') {
             date = new Date(date);
+        }
+        
+        // Check if the resulting date is valid
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return 'Invalid Date'; // Fallback for unhandleable formats
         }
         
         return date.toLocaleDateString('en-US', {
@@ -158,7 +169,7 @@ class Journal {
         if (!entriesList) return;
 
         entriesList.innerHTML = entries.map(entry => `
-            <article class="journal-entry-card">
+            <article class="journal-entry-card" data-id="${entry.id}">
                 <div class="entry-header">
                     <h3>${this.formatDate(entry.timestamp)}</h3>
                     <div class="entry-actions">
@@ -181,6 +192,12 @@ class Journal {
         entriesList.querySelectorAll('.menu-button').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                // Close all other dropdowns first
+                document.querySelectorAll('.menu-dropdown').forEach(dropdown => {
+                    if (dropdown !== btn.nextElementSibling) {
+                        dropdown.classList.remove('show');
+                    }
+                });
                 const dropdown = btn.nextElementSibling;
                 dropdown.classList.toggle('show');
             });
@@ -247,19 +264,117 @@ class Journal {
             }
 
             const entry = doc.data();
-            document.getElementById('journalText').value = entry.text;
-            document.getElementById('sleepHours').value = entry.sleepHours;
-            document.getElementById('stressLevel').value = entry.stressLevel;
-            document.getElementById('stressValue').textContent = entry.stressLevel;
+            const entryCard = document.querySelector(`.journal-entry-card[data-id="${entryId}"]`);
+            if (!entryCard) return;
 
-            // Store the entry ID for the update
-            document.getElementById('journalForm').dataset.editId = entryId;
+            // Store original content for cancel
+            const originalContent = entryCard.innerHTML;
 
-            // Scroll to the form
-            document.querySelector('.journal-entry').scrollIntoView({ behavior: 'smooth' });
+            // Create edit form
+            const editForm = document.createElement('form');
+            editForm.className = 'edit-form';
+            editForm.innerHTML = `
+                <div class="form-group">
+                    <label for="edit-text-${entryId}">How are you feeling today?</label>
+                    <textarea id="edit-text-${entryId}" rows="4" required>${entry.text}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-sleep-${entryId}">Hours of Sleep</label>
+                    <input type="number" id="edit-sleep-${entryId}" min="0" max="24" step="0.5" value="${entry.sleepHours}">
+                </div>
+                <div class="form-group">
+                    <label for="edit-stress-${entryId}">Stress Level (1-10)</label>
+                    <input type="range" id="edit-stress-${entryId}" min="1" max="10" value="${entry.stressLevel}">
+                    <span id="edit-stress-value-${entryId}">${entry.stressLevel}</span>
+                </div>
+                <div class="edit-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn cancel-edit">Cancel</button>
+                </div>
+            `;
+
+            // Replace content with edit form
+            entryCard.innerHTML = '';
+            entryCard.appendChild(editForm);
+
+            // Update stress level display
+            const stressInput = document.getElementById(`edit-stress-${entryId}`);
+            const stressValue = document.getElementById(`edit-stress-value-${entryId}`);
+            stressInput.addEventListener('input', () => {
+                stressValue.textContent = stressInput.value;
+            });
+
+            // Handle form submission
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const text = document.getElementById(`edit-text-${entryId}`).value;
+                const sleepHours = parseFloat(document.getElementById(`edit-sleep-${entryId}`).value);
+                const stressLevel = parseInt(document.getElementById(`edit-stress-${entryId}`).value);
+
+                // Show success message immediately
+                this.showToast('Success! Please reload the page to see your changes.', 'success');
+                
+                // Restore original content immediately
+                entryCard.innerHTML = originalContent;
+                this.attachEntryEventListeners(entryCard);
+
+                // Then try to update in Firebase
+                try {
+                    await this.updateJournalEntry(entryId, {
+                        text,
+                        sleepHours,
+                        stressLevel,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error updating entry:', error);
+                    this.showToast('Failed to update entry. Please try again.', 'error');
+                }
+            });
+
+            // Handle cancel button
+            editForm.querySelector('.cancel-edit').addEventListener('click', () => {
+                // Restore original content
+                entryCard.innerHTML = originalContent;
+                // Reattach event listeners
+                this.attachEntryEventListeners(entryCard);
+            });
         } catch (error) {
-            console.error('Error loading entry for edit:', error);
+            console.error('Error handling edit:', error);
             this.showToast('Failed to load entry for editing', 'error');
+        }
+    }
+
+    attachEntryEventListeners(entryCard) {
+        const menuButton = entryCard.querySelector('.menu-button');
+        const dropdown = entryCard.querySelector('.menu-dropdown');
+        const editButton = entryCard.querySelector('.edit');
+        const deleteButton = entryCard.querySelector('.delete');
+
+        if (menuButton && dropdown) {
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other dropdowns first
+                document.querySelectorAll('.menu-dropdown').forEach(d => {
+                    if (d !== dropdown) {
+                        d.classList.remove('show');
+                    }
+                });
+                dropdown.classList.toggle('show');
+            });
+        }
+
+        if (editButton) {
+            editButton.addEventListener('click', () => {
+                this.handleEdit(entryCard.dataset.id);
+            });
+        }
+
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+                this.showDeleteConfirmation(entryCard.dataset.id);
+            });
         }
     }
 } 

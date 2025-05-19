@@ -1,12 +1,22 @@
 :root {
-    --primary-color: #4a90e2;
-    --secondary-color: #67b26f;
-    --background-color: #f5f7fa;
-    --text-color: #2c3e50;
-    --error-color: #e74c3c;
-    --success-color: #2ecc71;
+    --primary-color: #6f42c1; /* Deep purple */
+    --secondary-color: #007bff; /* Vibrant Blue */
+    --background-color: #e9ecef; /* Light gray */
+    --card-background: rgba(255, 255, 255, 0.9); /* Slightly transparent white for cards */
+    --text-color: #343a40; /* Dark gray */
+    --heading-color: #495057; /* Slightly lighter dark gray */
+    --error-color: #dc3545; /* Red */
+    --success-color: #28a745; /* Green */
     --border-radius: 8px;
-    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+
+    /* New Typography Variables */
+    --heading-font: 'Montserrat', sans-serif;
+    --body-font: 'Open Sans', sans-serif;
+
+    /* New Gradient Colors */
+    --yellow-color: #ffda79; /* A soft yellow */
+    --pink-color: #f78fb3; /* A gentle pinkish tone */
 }
 
 * {
@@ -16,16 +26,18 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--body-font);
     line-height: 1.6;
-    color: #333;
-    background-color: #f5f5f5;
+    color: var(--text-color);
+    background: linear-gradient(to bottom right, var(--primary-color), var(--yellow-color), var(--pink-color)); /* Purple, Yellow, Pinkish gradient */
+    min-height: 100vh; /* Ensure gradient covers full viewport height */
+    background-attachment: fixed; /* Ensure gradient covers the entire viewport even with scrolling */
 }
 
 /* Header and Navigation */
 header {
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-background);
+    box-shadow: var(--box-shadow);
     padding: 1rem;
     position: sticky;
     top: 0;
@@ -43,7 +55,7 @@ nav {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: var(--heading-color);
 }
 
 .nav-links {
@@ -56,11 +68,12 @@ nav {
 .hero {
     text-align: center;
     padding: 4rem 2rem;
-    background: linear-gradient(135deg, #6c5ce7, #a8a4e6);
+    background: linear-gradient(135deg, var(--primary-color), #8a6cda); /* Gradient using primary color */
     color: white;
 }
 
 .hero h1 {
+    font-family: var(--heading-font);
     font-size: 2.5rem;
     margin-bottom: 1rem;
 }
@@ -79,9 +92,10 @@ nav {
 }
 
 .features h2 {
+    font-family: var(--heading-font);
     text-align: center;
     margin-bottom: 2rem;
-    color: #2c3e50;
+    color: var(--heading-color);
 }
 
 .feature-grid {
@@ -91,15 +105,16 @@ nav {
 }
 
 .feature-card {
-    background: white;
+    background: var(--card-background);
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
 }
 
 .feature-card h3 {
-    color: #2c3e50;
+    font-family: var(--heading-font);
+    color: var(--heading-color);
     margin-bottom: 1rem;
 }
 
@@ -121,7 +136,7 @@ nav {
 label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #2c3e50;
+    color: var(--text-color);
 }
 
 input[type="text"],
@@ -135,6 +150,7 @@ textarea {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+    font-family: var(--body-font);
 }
 
 input[type="range"] {
@@ -153,6 +169,7 @@ input[type="range"] {
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    font-family: var(--body-font);
 }
 
 /* Buttons */
@@ -162,27 +179,30 @@ input[type="range"] {
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
+    font-family: var(--body-font);
+    font-weight: 600;
 }
 
 .btn-primary {
-    background-color: #6c5ce7;
+    background-color: var(--primary-color);
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #5b4bc4;
+    background-color: #5a3a9f; /* Darker shade of primary */
 }
 
 /* Cards */
 .mood-tracker,
 .journal-entry,
 .mood-history,
-.journal-history {
-    background: white;
+.journal-history,
+.therapist-section {
+    background: var(--card-background);
     padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 /* Entries List */
@@ -192,7 +212,7 @@ input[type="range"] {
 
 .mood-entry-card,
 .journal-entry-card {
-    background: #f8f9fa;
+    background: var(--background-color);
     padding: 1rem;
     border-radius: 4px;
     margin-bottom: 1rem;
@@ -207,6 +227,8 @@ input[type="range"] {
 
 .entry-actions {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .mood-display {
@@ -232,12 +254,30 @@ input[type="range"] {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-size: 0.875rem;
+    color: var(--text-color);
 }
 
 /* Chart Container */
 .chart-container {
     margin: 1rem 0;
-    height: 200px;
+    /* height: 200px; */ /* Removed fixed height */
+}
+
+.mood-history h2 {
+    margin-top: 0;
+    margin-bottom: 0; /* Removed bottom margin */
+}
+
+.mood-history .chart-container {
+    display: none; /* Hide the chart container to eliminate the gap */
+}
+
+.mood-history .entries-list {
+    margin-top: 0;
+}
+
+.mood-history .entries-list .mood-entry-card:first-child {
+    margin-top: 0;
 }
 
 /* Modal */
@@ -253,13 +293,13 @@ input[type="range"] {
 }
 
 .modal-content {
-    background-color: white;
+    background-color: var(--card-background);
     margin: 10% auto;
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     max-width: 500px;
     position: relative;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
 }
 
 .close {
@@ -283,11 +323,11 @@ input[type="range"] {
 }
 
 .toast-success {
-    background-color: #2ecc71;
+    background-color: var(--success-color);
 }
 
 .toast-error {
-    background-color: #e74c3c;
+    background-color: var(--error-color);
 }
 
 @keyframes slideIn {
@@ -299,11 +339,20 @@ input[type="range"] {
     }
 }
 
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
 /* Footer */
 footer {
     text-align: center;
     padding: 2rem;
-    background-color: #2c3e50;
+    background-color: var(--heading-color);
     color: white;
     margin-top: 4rem;
 }
@@ -327,105 +376,56 @@ footer {
     }
 }
 
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Mood Tracker Styles */
-.mood-tracker {
-    background-color: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
-.mood-selector {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1rem;
-}
-
-.mood-btn {
-    font-size: 2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.mood-btn:hover {
-    transform: scale(1.2);
-}
-
-/* Journal Entry Styles */
-.journal-entry {
-    background-color: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-textarea,
-input[type="number"],
-input[type="range"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-}
-
-/* Mood History Styles */
-.mood-history {
-    background-color: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
-.chart-container {
-    margin: 2rem 0;
-    height: 300px;
-}
-
-.entries-list {
-    display: grid;
-    gap: 1rem;
-}
-
-/* Responsive Design */
 @media (min-width: 768px) {
     .dashboard {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr); /* Two columns on medium screens */
     }
 
-    .mood-history {
-        grid-column: 1 / -1;
+    .mood-tracker,
+    .journal-entry {
+        grid-column: span 1; /* Each takes one column */
+    }
+
+    .therapist-section {
+        grid-column: span 2; /* Therapist spans two columns below the forms */
+        order: 3; /* Ensure it appears after the forms */
+    }
+
+    .mood-history,
+    .journal-history {
+        grid-column: span 1; /* Each takes one column below the therapist */
     }
 }
 
 @media (min-width: 1024px) {
     .dashboard {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr); /* Three columns on large screens */
+    }
+
+    .mood-tracker,
+    .journal-entry {
+        grid-column: span 1; /* Forms in the first two columns */
+    }
+
+    .therapist-section {
+        grid-column: 3 / span 1; /* Therapist in the third column */
+        order: unset; /* Reset order */
     }
 
     .mood-history {
-        grid-column: 1 / -1;
+        grid-column: span 2; /* Mood history spans two columns */
+    }
+
+    .journal-history {
+        grid-column: span 1; /* Journal history spans one column */
     }
 }
 
 /* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
 .text-center {
     text-align: center;
 }
@@ -459,20 +459,20 @@ input[type="range"] {
 .success-content {
     text-align: center;
     padding: 3rem 2rem;
-    background-color: white;
+    background-color: var(--card-background);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
 }
 
 .success-content h2 {
-    color: #2ecc71;
+    color: var(--success-color);
     margin-bottom: 1rem;
     font-size: 1.8rem;
 }
 
 .success-content p {
     margin-bottom: 1rem;
-    color: #666;
+    color: var(--text-color);
     font-size: 1.1rem;
 }
 
@@ -482,7 +482,7 @@ input[type="range"] {
     height: 40px;
     margin: 2rem auto;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #6c5ce7;
+    border-top: 4px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -500,7 +500,7 @@ input[type="range"] {
 }
 
 #userEmail {
-    color: #2c3e50;
+    color: var(--heading-color);
     font-weight: 500;
 }
 
@@ -508,12 +508,21 @@ input[type="range"] {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    font-size: 1.2rem;
-    color: #666;
+    padding: 5px 10px;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
 }
 
 .menu-button:hover {
+    background-color: #f0f0f0;
     color: #333;
 }
 
@@ -522,11 +531,12 @@ input[type="range"] {
     position: absolute;
     right: 0;
     top: 100%;
-    background: white;
+    background: var(--card-background);
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     min-width: 120px;
+    margin-top: 5px;
 }
 
 .menu-dropdown.show {
@@ -541,19 +551,21 @@ input[type="range"] {
     border: none;
     background: none;
     cursor: pointer;
-    color: #333;
+    color: var(--text-color);
+    transition: background-color 0.2s;
+    font-family: var(--body-font);
 }
 
 .menu-dropdown button:hover {
-    background: #f5f5f5;
+    background: var(--background-color);
 }
 
 .menu-dropdown button.delete {
-    color: #e74c3c;
+    color: var(--error-color);
 }
 
 .menu-dropdown button.edit {
-    color: #3498db;
+    color: var(--primary-color);
 }
 
 /* Confirmation Dialog */
@@ -575,9 +587,9 @@ input[type="range"] {
 }
 
 .confirmation-content {
-    background: white;
+    background: var(--card-background);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     max-width: 400px;
     width: 90%;
 }
@@ -594,14 +606,216 @@ input[type="range"] {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-family: var(--body-font);
 }
 
 .confirmation-actions .confirm {
-    background: #e74c3c;
+    background: var(--error-color);
     color: white;
 }
 
 .confirmation-actions .cancel {
     background: #95a5a6;
     color: white;
+}
+
+.edit-form {
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.edit-actions .btn {
+    flex: 1;
+}
+
+.edit-actions .cancel-edit {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.edit-actions .cancel-edit:hover {
+    background-color: #dee2e6;
+}
+
+/* Therapist Section Styles */
+.therapist-section {
+    background-color: var(--card-background);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-top: 2rem;
+}
+
+.therapist-container {
+    max-width: 1000px; /* Increased max-width */
+    margin: 0 auto;
+}
+
+.therapist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.therapist-response {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    min-height: 200px;
+}
+
+.therapist-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    max-width: 80%;
+}
+
+.therapist-message p {
+    margin-bottom: 0.5rem;
+}
+
+.therapist-message:last-child {
+    margin-bottom: 0;
+}
+
+.therapist-message.user {
+    background-color: var(--background-color);
+    align-self: flex-end;
+}
+
+.therapist-message.ai {
+    background-color: var(--primary-color);
+    color: white;
+    align-self: flex-start;
+}
+
+/* Therapist Chat Styles */
+.therapist-chat-box {
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    height: 400px; /* Set a fixed height for the chat box */
+    overflow-y: auto; /* Enable scrolling */
+    padding: 1rem;
+    background-color: var(--background-color);
+}
+
+.therapist-chat-history {
+    flex-grow: 1;
+    overflow-y: auto; /* Enable scrolling for history */
+    margin-bottom: 1rem;
+}
+
+.therapist-chat-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.therapist-chat-input input[type="text"] {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: var(--body-font);
+}
+
+.therapist-chat-input button {
+    padding: 0.5rem 1rem;
+    font-family: var(--body-font);
+}
+
+/* Adjust message styles within chat box if needed */
+.therapist-chat-history .therapist-message.user {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+.therapist-chat-history .therapist-message.ai {
+     background-color: var(--primary-color);
+     color: white;
+}
+
+.therapist-chat-history .therapist-message p {
+    margin-bottom: 0;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 2rem auto;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Account Settings Styles */
+.account-settings {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.account-settings h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--heading-color);
+    font-family: var(--heading-font);
+}
+
+.settings-card {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.settings-card h3 {
+    color: var(--heading-color);
+    font-family: var(--heading-font);
+    margin-bottom: 1rem;
+}
+
+/* Ensure form group styles are applied */
+.account-settings .form-group {
+    margin-bottom: 1rem;
+}
+
+.account-settings label {
+     display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.account-settings input[type="email"],
+.account-settings input[type="password"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: var(--body-font);
+}
+
+.account-settings .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
 } 

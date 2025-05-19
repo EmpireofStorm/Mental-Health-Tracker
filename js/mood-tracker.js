@@ -3,6 +3,13 @@ class MoodTracker {
         this.auth = window.auth;
         this.db = window.db;
         
+        // Flag to prevent double saving
+        this.isSaving = false;
+
+        // Store bound handlers
+        this.boundProcessMoodSave = this.processMoodSave.bind(this);
+        this.boundHandleSaveButtonClick = this.handleSaveButtonClick.bind(this); // Bind button click handler
+
         if (!this.auth || !this.db) {
             console.error('Firebase services not initialized');
             return;
@@ -17,16 +24,52 @@ class MoodTracker {
 
     setupMoodForm() {
         const form = document.getElementById('moodForm');
-        if (form) {
-            form.addEventListener('submit', (e) => this.handleMoodSubmit(e));
+        const saveButton = form ? form.querySelector('button[type="submit"]') : null;
+
+        if (form && saveButton) {
+            // Remove any existing listeners before adding new ones
+            form.removeEventListener('submit', this.boundProcessMoodSave); // Keep this in case form submit is still somehow triggered
+            saveButton.removeEventListener('click', this.boundHandleSaveButtonClick); // Remove existing button click listener
+
+            // Add click listener to the save button
+            saveButton.addEventListener('click', this.boundHandleSaveButtonClick);
         }
     }
 
-    async handleMoodSubmit(e) {
-        e.preventDefault();
+    // New handler for button click
+    async handleSaveButtonClick(e) {
+        console.log('Save button clicked.'); // Log button click
+        e.preventDefault(); // Prevent default button click behavior
+
+        const form = document.getElementById('moodForm');
+        const saveButton = form ? form.querySelector('button[type="submit"]') : null;
+
+        if (saveButton) {
+            saveButton.disabled = true; // Disable button on click
+            // Re-enable button after 1 second
+            setTimeout(() => {
+                saveButton.disabled = false;
+            }, 1000);
+        }
+
+        await this.processMoodSave(); // Call processSave immediately
+    }
+
+    // Renamed and modified function to handle the save logic
+    async processMoodSave() {
+        console.log('Entering processMoodSave.'); // Log entering function
+        // Prevent double clicking/saving
+        console.log('Checking isSaving flag:', this.isSaving); // Log isSaving state
+        if (this.isSaving) {
+            console.log('Save already in progress. Ignoring.'); // Log if save is skipped
+            return;
+        }
+        this.isSaving = true;
+        console.log('isSaving set to true.'); // Log when isSaving is set
 
         if (!this.auth.currentUser) {
             this.showToast('Please log in to track your mood', 'error');
+            this.isSaving = false; // Reset flag
             return;
         }
 
@@ -34,23 +77,35 @@ class MoodTracker {
         const activities = Array.from(document.querySelectorAll('input[name="activities"]:checked'))
             .map(checkbox => checkbox.value);
         const notes = document.getElementById('moodNotes').value;
+        const title = document.getElementById('moodTitle').value.trim(); // Get title and remove leading/trailing whitespace
 
         try {
             const entry = {
                 mood,
                 activities,
                 notes,
+                title: title || 'Mood Entry', // Use provided title or default to 'Mood Entry'
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 userId: this.auth.currentUser.uid
             };
 
+            console.log('Attempting to save mood entry:', entry);
+
             await this.db.collection('mood_entries').add(entry);
-            this.showToast('Mood entry saved successfully!', 'success');
-            e.target.reset();
+            this.showToast('Mood entry saved successfully!', 'success', 700); // Updated message (removed reload instruction)
+            
+            // Find the form and reset it
+            const form = document.getElementById('moodForm');
+            if (form) {
+                form.reset();
+            }
+
             await this.loadMoodHistory();
         } catch (error) {
             console.error('Error saving mood:', error);
             this.showToast('Failed to save mood entry. Please try again.', 'error');
+        } finally {
+            this.isSaving = false; // Reset flag
         }
     }
 
@@ -93,28 +148,74 @@ class MoodTracker {
     async updateMoodEntry(entryId, updates) {
         try {
             await this.db.collection('mood_entries').doc(entryId).update(updates);
-            this.showToast('Entry updated successfully', 'success');
-            await this.loadMoodHistory();
+            return true;
         } catch (error) {
             console.error('Error updating entry:', error);
-            this.showToast('Failed to update entry', 'error');
+            throw new Error('Failed to update entry. Please try again.');
         }
     }
 
-    showToast(message, type) {
+    showToast(message, type, delay = 4000) {
+        // Remove any existing toasts
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.padding = '15px 25px';
+        toast.style.borderRadius = '4px';
+        toast.style.color = 'white';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        toast.style.animation = 'slideIn 0.3s ease-out';
+        
+        if (type === 'success') {
+            toast.style.backgroundColor = '#2ecc71';
+        } else {
+            toast.style.backgroundColor = '#e74c3c';
+        }
+
         document.body.appendChild(toast);
 
+        // Increase display time
+        if (delay === 'infinite') {
+            toast.style.animation = 'infiniteSlide 0.3s ease-out';
+        }
+        
         setTimeout(() => {
-            toast.remove();
-        }, 3000);
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, delay);
     }
 
     formatDate(date) {
         if (!date) return 'N/A';
-        return new Date(date.toDate()).toLocaleDateString('en-US', {
+
+        // Handle Firestore Timestamp objects or similar structures
+        if (typeof date.toDate === 'function') {
+            date = date.toDate();
+        }
+        // Handle cases where it might be a Firebase server timestamp object with seconds
+        else if (date.seconds !== undefined) {
+             date = new Date(date.seconds * 1000);
+        }
+        // Handle ISO string or other date string formats
+        else if (typeof date === 'string') {
+            date = new Date(date);
+        }
+        
+        // Check if the resulting date is valid
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return 'Invalid Date'; // Fallback for unhandleable formats
+        }
+        
+        return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -142,13 +243,16 @@ class MoodTracker {
             return;
         }
 
-        historyContainer.innerHTML = entries.map(entry => `
-            <article class="mood-entry-card">
+        historyContainer.innerHTML = entries.map((entry, index) => `
+            <article class="mood-entry-card" data-id="${entry.id}">
                 <div class="entry-header">
-                    <h3>${this.formatDate(entry.timestamp)}</h3>
+                    <h3>${(entry.title || 'Mood Entry')} #${entries.length - index}</h3>
                     <div class="entry-actions">
-                        <button class="btn btn-edit" data-id="${entry.id}">Edit</button>
-                        <button class="btn btn-delete" data-id="${entry.id}">Delete</button>
+                        <button class="menu-button" data-id="${entry.id}">⋮</button>
+                        <div class="menu-dropdown" data-id="${entry.id}">
+                            <button class="edit">Edit</button>
+                            <button class="delete">Delete</button>
+                        </div>
                     </div>
                 </div>
                 <div class="mood-display">
@@ -164,13 +268,37 @@ class MoodTracker {
             </article>
         `).join('');
 
-        // Add event listeners for edit and delete buttons
-        historyContainer.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', () => this.handleEdit(btn.dataset.id));
+        // Add event listeners for menu buttons
+        historyContainer.querySelectorAll('.menu-button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other dropdowns first
+                document.querySelectorAll('.menu-dropdown').forEach(dropdown => {
+                    if (dropdown !== btn.nextElementSibling) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+                const dropdown = btn.nextElementSibling;
+                dropdown.classList.toggle('show');
+            });
         });
 
-        historyContainer.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', () => this.handleDelete(btn.dataset.id));
+        // Add event listeners for edit and delete buttons
+        historyContainer.querySelectorAll('.menu-dropdown .edit').forEach(btn => {
+            btn.addEventListener('click', () => this.handleEdit(btn.closest('.menu-dropdown').dataset.id));
+        });
+
+        historyContainer.querySelectorAll('.menu-dropdown .delete').forEach(btn => {
+            btn.addEventListener('click', () => this.handleDelete(btn.closest('.menu-dropdown').dataset.id));
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.entry-actions')) {
+                document.querySelectorAll('.menu-dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
         });
     }
 
@@ -191,20 +319,138 @@ class MoodTracker {
             const entry = entries.find(e => e.id === entryId);
             
             if (entry) {
-                document.getElementById('mood').value = entry.mood;
-                document.getElementById('moodNotes').value = entry.notes || '';
-                
-                // Reset all checkboxes
-                document.querySelectorAll('input[name="activities"]').forEach(checkbox => {
-                    checkbox.checked = entry.activities.includes(checkbox.value);
+                const entryCard = document.querySelector(`.mood-entry-card[data-id="${entryId}"]`);
+                if (!entryCard) return;
+
+                // Store original content for cancel
+                const originalContent = entryCard.innerHTML;
+
+                // Create edit form
+                const editForm = document.createElement('form');
+                editForm.className = 'edit-form';
+                editForm.innerHTML = `
+                    <div class="form-group">
+                        <label for="edit-title-${entryId}">Title:</label>
+                        <input type="text" id="edit-title-${entryId}" value="${entry.title || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-mood-${entryId}">Mood:</label>
+                        <select id="edit-mood-${entryId}" required>
+                            <option value="Very Happy" ${entry.mood === 'Very Happy' ? 'selected' : ''}>Very Happy 😄</option>
+                            <option value="Happy" ${entry.mood === 'Happy' ? 'selected' : ''}>Happy 🙂</option>
+                            <option value="Neutral" ${entry.mood === 'Neutral' ? 'selected' : ''}>Neutral 😐</option>
+                            <option value="Sad" ${entry.mood === 'Sad' ? 'selected' : ''}>Sad 🙁</option>
+                            <option value="Very Sad" ${entry.mood === 'Very Sad' ? 'selected' : ''}>Very Sad 😢</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Activities:</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="edit-activities-${entryId}" value="Exercise" ${entry.activities.includes('Exercise') ? 'checked' : ''}> Exercise
+                            </label>
+                            <label>
+                                <input type="checkbox" name="edit-activities-${entryId}" value="Meditation" ${entry.activities.includes('Meditation') ? 'checked' : ''}> Meditation
+                            </label>
+                            <label>
+                                <input type="checkbox" name="edit-activities-${entryId}" value="Reading" ${entry.activities.includes('Reading') ? 'checked' : ''}> Reading
+                            </label>
+                            <label>
+                                <input type="checkbox" name="edit-activities-${entryId}" value="Social" ${entry.activities.includes('Social') ? 'checked' : ''}> Social
+                            </label>
+                            <label>
+                                <input type="checkbox" name="edit-activities-${entryId}" value="Work" ${entry.activities.includes('Work') ? 'checked' : ''}> Work
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-notes-${entryId}">Notes:</label>
+                        <textarea id="edit-notes-${entryId}" rows="3">${entry.notes || ''}</textarea>
+                    </div>
+                    <div class="edit-actions">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn cancel-edit">Cancel</button>
+                    </div>
+                `;
+
+                // Replace content with edit form
+                entryCard.innerHTML = '';
+                entryCard.appendChild(editForm);
+
+                // Handle form submission
+                editForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const title = document.getElementById(`edit-title-${entryId}`).value.trim();
+                    const mood = document.getElementById(`edit-mood-${entryId}`).value;
+                    const activities = Array.from(document.querySelectorAll(`input[name="edit-activities-${entryId}"]:checked`))
+                        .map(checkbox => checkbox.value);
+                    const notes = document.getElementById(`edit-notes-${entryId}`).value;
+
+                    // Show success message immediately
+                    this.showToast('Success! Please reload the page to see your changes.', 'success');
+                    
+                    // Restore original content immediately
+                    entryCard.innerHTML = originalContent;
+                    this.attachEntryEventListeners(entryCard);
+
+                    // Then try to update in Firebase
+                    try {
+                        await this.updateMoodEntry(entryId, {
+                            title,
+                            mood,
+                            activities,
+                            notes
+                        });
+                    } catch (error) {
+                        console.error('Error updating entry:', error);
+                        this.showToast('Failed to update entry. Please try again.', 'error');
+                    }
                 });
-                
-                // Scroll to form
-                document.getElementById('moodForm').scrollIntoView({ behavior: 'smooth' });
+
+                // Handle cancel button
+                editForm.querySelector('.cancel-edit').addEventListener('click', () => {
+                    // Restore original content
+                    entryCard.innerHTML = originalContent;
+                    // Reattach event listeners
+                    this.attachEntryEventListeners(entryCard);
+                });
             }
         } catch (error) {
             console.error('Error handling edit:', error);
             this.showToast('Failed to load entry for editing', 'error');
+        }
+    }
+
+    attachEntryEventListeners(entryCard) {
+        const menuButton = entryCard.querySelector('.menu-button');
+        const dropdown = entryCard.querySelector('.menu-dropdown');
+        const editButton = entryCard.querySelector('.edit');
+        const deleteButton = entryCard.querySelector('.delete');
+
+        if (menuButton && dropdown) {
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other dropdowns first
+                document.querySelectorAll('.menu-dropdown').forEach(d => {
+                    if (d !== dropdown) {
+                        d.classList.remove('show');
+                    }
+                });
+                dropdown.classList.toggle('show');
+            });
+        }
+
+        if (editButton) {
+            editButton.addEventListener('click', () => {
+                this.handleEdit(entryCard.dataset.id);
+            });
+        }
+
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+                this.handleDelete(entryCard.dataset.id);
+            });
         }
     }
 
