@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualizations - Mental Health Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+    
+    <!-- Firebase Initialization (using config.js) -->
+    <script src="js/config.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body class="visualizations-page">
+    <header>
+        <nav>
+            <div class="logo">Mental Health Tracker</div>
+            <div class="nav-links">
+                 <a href="dashboard.html" class="btn">Dashboard</a>
+                <div id="userSection">
+                    <span id="userEmail"></span>
+                    <a href="account.html" class="btn">Account</a>
+                    <button id="logoutBtn" class="btn">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="visualizations-section">
+            <h2>Your Data Visualizations</h2>
+            <div class="chart-container">
+                <h3>Mood Trends</h3>
+                <canvas id="moodChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Stress Level Over Time</h3>
+                <canvas id="stressChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mental Health Tracker. All rights reserved.</p>
+    </footer>
+
+    <!-- Custom Scripts (loaded as modules after DOM is ready) -->
+    <script src="js/auth.js" type="module"></script> <!-- For auth state -->
+    <script src="js/visualizations.js" type="module"></script> <!-- Handles data fetching and chart rendering -->
+</body>
+</html> 

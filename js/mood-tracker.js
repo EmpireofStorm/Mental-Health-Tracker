@@ -46,22 +46,22 @@ class MoodTracker {
 
         if (saveButton) {
             saveButton.disabled = true; // Disable button on click
-            // Re-enable button after 1 second
-            setTimeout(() => {
-                saveButton.disabled = false;
-            }, 1000);
         }
 
-        await this.processMoodSave(); // Call processSave immediately
+        await this.processMoodSave(saveButton); // Pass button to processSave
     }
 
     // Renamed and modified function to handle the save logic
-    async processMoodSave() {
+    async processMoodSave(saveButton) {
         console.log('Entering processMoodSave.'); // Log entering function
         // Prevent double clicking/saving
         console.log('Checking isSaving flag:', this.isSaving); // Log isSaving state
         if (this.isSaving) {
             console.log('Save already in progress. Ignoring.'); // Log if save is skipped
+            // Re-enable button here if somehow a second process started and was caught by isSaving
+             if (saveButton) {
+                 saveButton.disabled = false;
+             }
             return;
         }
         this.isSaving = true;
@@ -70,6 +70,9 @@ class MoodTracker {
         if (!this.auth.currentUser) {
             this.showToast('Please log in to track your mood', 'error');
             this.isSaving = false; // Reset flag
+            if (saveButton) {
+                saveButton.disabled = false; // Re-enable button
+            }
             return;
         }
 
@@ -91,9 +94,12 @@ class MoodTracker {
 
             console.log('Attempting to save mood entry:', entry);
 
-            await this.db.collection('mood_entries').add(entry);
+            const docRef = await this.db.collection('mood_entries').add(entry);
             this.showToast('Mood entry saved successfully!', 'success', 700); // Updated message (removed reload instruction)
             
+            // After saving, check for and delete duplicate entries
+            await this.deleteDuplicateMoodEntries(entry);
+
             // Find the form and reset it
             const form = document.getElementById('moodForm');
             if (form) {
@@ -106,6 +112,62 @@ class MoodTracker {
             this.showToast('Failed to save mood entry. Please try again.', 'error');
         } finally {
             this.isSaving = false; // Reset flag
+            if (saveButton) {
+                saveButton.disabled = false; // Re-enable button
+            }
+        }
+    }
+
+    // Helper function to delete duplicate entries saved close in time, keeping only the newest
+    async deleteDuplicateMoodEntries(savedEntryData) {
+        try {
+            const userId = this.auth.currentUser.uid;
+            // Fetch a few recent entries ordered by timestamp descending
+            const snapshot = await this.db.collection('mood_entries')
+                .where('userId', '==', userId)
+                .orderBy('timestamp', 'desc')
+                .limit(10) // Fetch enough entries to catch potential duplicates
+                .get();
+
+            const recentEntries = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                // Include a simplified timestamp for comparison if needed, though comparing content is primary
+                // timestamp: entryData.timestamp ? entryData.timestamp.toDate().getTime() : 0
+            }));
+
+            // Filter for entries that match the content of the saved entry
+            const duplicateCandidates = recentEntries.filter(entry => {
+                // Compare content fields. We don't compare timestamp directly.
+                return entry.mood === savedEntryData.mood &&
+                       JSON.stringify(entry.activities) === JSON.stringify(savedEntryData.activities) &&
+                       entry.notes === savedEntryData.notes &&
+                       entry.title === savedEntryData.title;
+            });
+
+            // If duplicates are found, keep the newest one (the first in the descending list)
+            if (duplicateCandidates.length > 1) {
+                // Start from the second element (index 1) to delete older duplicates
+                for (let i = 1; i < duplicateCandidates.length; i++) {
+                    const duplicateEntry = duplicateCandidates[i];
+                    console.log('Deleting older duplicate mood entry with ID:', duplicateEntry.id);
+                    await this.db.collection('mood_entries').doc(duplicateEntry.id).delete();
+                }
+                 // After deleting, reload history to update the display
+                 this.loadMoodHistory();
+            } else if (duplicateCandidates.length === 1) {
+              // If only one entry with matching content is found, ensure history is loaded
+              // This handles cases where the saved entry was the first of its kind
+              this.loadMoodHistory();
+            }
+             // If no duplicates with matching content are found, load history anyway
+             else {
+                this.loadMoodHistory();
+             }
+
+        } catch (error) {
+            console.error('Error deleting duplicate mood entries:', error);
+            // Optionally show a toast about potential duplicates not being removed
         }
     }
 
@@ -120,7 +182,7 @@ class MoodTracker {
             const snapshot = await this.db.collection('mood_entries')
                 .where('userId', '==', userId)
                 .orderBy('timestamp', 'desc')
-                .limit(10)
+                .limit(30)
                 .get();
 
             return snapshot.docs.map(doc => ({
@@ -246,7 +308,7 @@ class MoodTracker {
         historyContainer.innerHTML = entries.map((entry, index) => `
             <article class="mood-entry-card" data-id="${entry.id}">
                 <div class="entry-header">
-                    <h3>${(entry.title || 'Mood Entry')} #${entries.length - index}</h3>
+                    <h3>${this.formatDate(entry.timestamp)}</h3>
                     <div class="entry-actions">
                         <button class="menu-button" data-id="${entry.id}">⋮</button>
                         <div class="menu-dropdown" data-id="${entry.id}">

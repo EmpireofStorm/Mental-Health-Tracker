@@ -2,6 +2,7 @@ class Auth {
     constructor() {
         console.log('Auth class initialized');
         this.auth = window.auth;
+        this.currentUser = null;
         this.setupAuthListeners();
         this.setupAuthForms();
     }
@@ -10,6 +11,7 @@ class Auth {
         console.log('Setting up auth listeners');
         this.auth.onAuthStateChanged((user) => {
             console.log('Auth state changed:', user ? 'logged in' : 'logged out');
+            this.currentUser = user;
             if (user) {
                 console.log('User details:', user.email);
             }
@@ -157,8 +159,18 @@ class Auth {
         };
         return errorMessages[errorCode] || 'An error occurred';
     }
+
+    getCurrentUser() {
+        return this.currentUser;
+    }
 }
 
 // Initialize auth
 console.log('Initializing auth manager');
-const authManager = new Auth(); 
+const authManager = new Auth();
+
+// Make the authManager instance globally available
+window.authManager = authManager;
+
+// Make the goals instance globally available so auth can access it
+// window.goals = new Goals(); 

@@ -55,8 +55,10 @@ class Journal {
                 delete form.dataset.editId;
             } else {
                 // Create new entry
-                await this.db.collection('journal_entries').add(entry);
+                const docRef = await this.db.collection('journal_entries').add(entry);
                 this.showToast('Journal entry saved successfully!', 'success', 700);
+                // Clean up potential duplicates
+                await this.deleteDuplicateJournalEntries(entry, docRef.id);
             }
 
             form.reset();
@@ -65,6 +67,44 @@ class Journal {
         } catch (error) {
             console.error('Error saving journal entry:', error);
             this.showToast('Failed to save entry', 'error');
+        }
+    }
+
+    async deleteDuplicateJournalEntries(savedEntry, savedEntryId) {
+        if (!this.auth.currentUser) {
+            console.log('No user logged in, cannot clean up duplicates.');
+            return;
+        }
+
+        try {
+            const userId = this.auth.currentUser.uid;
+            // Fetch entries with the same content, excluding the one just saved temporarily
+            const snapshot = await this.db.collection('journal_entries')
+                .where('userId', '==', userId)
+                .where('text', '==', savedEntry.text)
+                .where('sleepHours', '==', savedEntry.sleepHours)
+                .where('stressLevel', '==', savedEntry.stressLevel)
+                .orderBy('timestamp', 'desc') // Get the most recent first
+                .get();
+
+            if (snapshot.docs.length > 1) {
+                console.log('Found potential journal duplicates:', snapshot.docs.length);
+                // Keep the most recent one (which should be the one just saved or a true duplicate)
+                // and delete the others.
+                for (let i = 1; i < snapshot.docs.length; i++) {
+                    const docToDelete = snapshot.docs[i];
+                    // Ensure we don't delete the entry we just saved, in case the query includes it
+                    if (docToDelete.id !== savedEntryId) {
+                        console.log('Deleting duplicate journal entry with ID:', docToDelete.id);
+                        await this.db.collection('journal_entries').doc(docToDelete.id).delete();
+                    }
+                }
+            } else {
+                 console.log('No journal duplicates found for this entry content.');
+            }
+
+        } catch (error) {
+            console.error('Error cleaning up duplicate journal entries:', error);
         }
     }
 
@@ -79,7 +119,7 @@ class Journal {
             const snapshot = await this.db.collection('journal_entries')
                 .where('userId', '==', userId)
                 .orderBy('timestamp', 'desc')
-                .limit(10)
+                .limit(30)
                 .get();
 
             return snapshot.docs.map(doc => ({

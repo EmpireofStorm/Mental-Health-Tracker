@@ -12,6 +12,8 @@
         <nav>
             <div class="logo">Mental Health Tracker</div>
             <div class="nav-links">
+                <button class="btn nav-tab-link active" data-target="dashboardContent">Dashboard</button>
+                <button class="btn nav-tab-link" data-target="goalsContent">Goals</button>
                 <div id="userSection">
                     <span id="userEmail"></span>
                     <a href="account.html" class="btn">Account</a>
@@ -22,7 +24,20 @@
     </header>
 
     <main>
-        <section class="dashboard-grid">
+        <section id="dashboardContent" class="dashboard-grid">
+             <!-- Featured Goal Section -->
+             <article id="featuredGoal" class="dashboard-card">
+                 <h2>Featured Goal</h2>
+                 <div id="featuredGoalContent">
+                     <!-- Featured goal details and progress will be loaded here -->
+                     <!-- Dynamic content is added by js/goals.js -->
+                     <!-- Static content to make it look fuller -->
+                     <p>Keep going!</p>
+                     <p>Remember why you started.</p>
+                     <div class="quote">"The best way to predict the future is to create it." - Peter Drucker</div>
+                 </div>
+             </article>
+
             <article class="mood-tracker">
                 <h2>How are you feeling today?</h2>
                 <form id="moodForm">
@@ -110,7 +125,7 @@
             </article>
 
             <article class="mood-history">
-                <h2>Your Mood History</h2>
+                <h2>Your Mood History <a href="visualizations.html#moodChart" class="btn btn-secondary btn-small">Visualize</a></h2>
                 <div class="chart-container">
                     <canvas id="moodChart"></canvas>
                 </div>
@@ -120,11 +135,21 @@
             </article>
 
             <article class="journal-history">
-                <h2>Journal History</h2>
+                <h2>Journal History <a href="visualizations.html#stressChart" class="btn btn-secondary btn-small">Visualize</a></h2>
                 <div id="entriesList" class="entries-list">
                     <!-- Journal entries will be dynamically inserted here -->
                 </div>
             </article>
+        </section>
+
+        <section id="goalsContent" class="dashboard-grid hidden">
+             <article class="dashboard-card goals-history">
+                <h2>Your Goals</h2>
+                <div id="goalsList">
+                    <!-- Goals will be dynamically inserted here -->
+                </div>
+                <button id="addGoalBtn" class="btn btn-primary">Add New Goal</button>
+             </article>
         </section>
     </main>
 
@@ -144,6 +169,49 @@
         </div>
     </div>
 
+    <!-- Add Goal Modal -->
+    <div id="addGoalModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeGoalModal">&times;</span>
+            <h2>Add New Goal</h2>
+            <form id="addGoalForm">
+                <div class="form-group">
+                    <label for="goalName">Goal Name:</label>
+                    <input type="text" id="goalName" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalDescription">Description:</label>
+                    <textarea id="goalDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="goalType">Goal Type:</label>
+                    <select id="goalType" required>
+                        <option value="stress-level-avg">Average Stress Level (last 7 entries)</option>
+                        <!-- Add other goal types here later -->
+                    </select>
+                </div>
+                
+                <!-- Time Period Fields -->
+                <div class="form-group">
+                    <label for="goalStartDate">Start Date:</label>
+                    <input type="date" id="goalStartDate">
+                </div>
+                 <div class="form-group">
+                    <label for="goalEndDate">End Date:</label>
+                    <input type="date" id="goalEndDate">
+                </div>
+
+                <!-- Target Value Field (initially hidden, shown based on goal type) -->
+                 <div class="form-group" id="targetValueGroup" style="display: none;">
+                    <label for="goalTargetValue">Target Value:</label>
+                    <input type="number" id="goalTargetValue" step="any">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Goal</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -159,11 +227,72 @@
     <script src="js/mood-tracker.js"></script>
     <script src="js/journal.js"></script>
     <script src="js/therapist.js"></script>
+    <script src="js/goals.js"></script>
     <script>
         // Initialize components
         const moodTracker = new MoodTracker();
         const journal = new Journal();
         const therapist = new Therapist();
+        // const goals = new Goals(); // Remove global initialization
+
+        let goalsInitialized = false; // Flag to track initialization
+        let goalsInstance = null; // Store the goals instance
+
+        // Script for tab switching
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabLinks = document.querySelectorAll('.nav-tab-link');
+            const sections = document.querySelectorAll('.dashboard-grid');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', async (e) => { // Added async here
+                    e.preventDefault();
+                    const targetId = e.target.dataset.target;
+
+                    // Remove active class from all links and add to clicked link
+                    tabLinks.forEach(navLink => navLink.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // Hide all sections and show the target section
+                    sections.forEach(section => section.classList.add('hidden'));
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+
+                    // Get the body element
+                    const body = document.body;
+
+                    // Add or remove 'goals-active' class based on the active tab
+                    if (targetId === 'goalsContent') {
+                        body.classList.add('goals-active');
+                    } else {
+                        body.classList.remove('goals-active');
+                    }
+
+                    // Initialize/Load Goals only when the Goals tab is clicked
+                    if (targetId === 'goalsContent') {
+                        // Get the current user using the global authManager instance
+                        const user = window.authManager ? window.authManager.getCurrentUser() : null;
+
+                        if (!goalsInitialized) {
+                            console.log('Goals tab clicked for the first time. Initializing Goals.');
+                            // Create and initialize the Goals instance
+                            goalsInstance = new Goals();
+                            goalsInstance.activateGoalsSection(user);
+                            goalsInitialized = true; // Set flag to true
+                        } else {
+                             console.log('Goals tab clicked again. Reloading goals.');
+                             // If already initialized, just reload goals using the current user state
+                             if (goalsInstance) {
+                                goalsInstance.activateGoalsSection(user);
+                             }
+                        }
+                    }
+                });
+            });
+             // Ensure the initial dashboard content is visible on page load
+             document.getElementById('dashboardContent').classList.remove('hidden');
+        });
     </script>
 </body>
 </html> 

@@ -17,6 +17,18 @@
     /* New Gradient Colors */
     --yellow-color: #ffda79; /* A soft yellow */
     --pink-color: #f78fb3; /* A gentle pinkish tone */
+
+    --background-color: #f4f7f6;
+    --text-color-secondary: #555555;
+    --accent-color: #007bff;
+    --button-background: #007bff;
+    --button-hover-background: #0056b3;
+    --button-text-color: #ffffff;
+    --featured-goal-background: #e9ecef; /* Light grey */
+    --featured-goal-border: #ced4da; /* Slightly darker grey */
+    --featured-goal-text-color: #495057; /* Dark grey */
+    --featured-goal-accent-color: #6c757d; /* Medium grey */
+    --featured-goal-text-color-secondary: #6c757d;
 }
 
 * {
@@ -32,6 +44,9 @@ body {
     background: linear-gradient(to bottom right, var(--primary-color), var(--yellow-color), var(--pink-color)); /* Purple, Yellow, Pinkish gradient */
     min-height: 100vh; /* Ensure gradient covers full viewport height */
     background-attachment: fixed; /* Ensure gradient covers the entire viewport even with scrolling */
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 20px;
 }
 
 /* Header and Navigation */
@@ -120,12 +135,75 @@ nav {
 
 /* Dashboard Grid */
 .dashboard-grid {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for flexibility */
+    grid-auto-rows: minmax(180px, auto); /* Increased base auto-rows */
+    margin: 20px auto; /* Center the grid and add vertical margin */
+    max-width: 1200px; /* Limit maximum width */
+    padding: 0 15px; /* Add horizontal padding */
+}
+
+/* Ensure dashboard cards also fit the grid and have basic styling */
+.dashboard-card,
+.mood-tracker,
+.journal-entry,
+.therapist-section,
+.mood-history,
+.journal-history {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* Style for individual goal cards in the goals list */
+.goal-card {
+    background-color: var(--card-background); /* Background for regular goal cards */
+    border: none; /* No border for regular goal cards */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    justify-content: space-between; /* Distribute space between items */
+    box-sizing: border-box;
+}
+
+.goal-card h3 {
+    margin-top: 0;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.goal-card .goal-details {
+    flex-grow: 1;
+}
+
+.goal-card .goal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: flex-end;
+}
+
+.goal-card .goal-actions button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--button-background);
+    color: var(--button-text-color);
+    transition: background-color 0.3s ease;
+}
+
+.goal-card .goal-actions button:hover {
+    background-color: var(--button-hover-background);
 }
 
 /* Forms and Inputs */
@@ -191,18 +269,6 @@ input[type="range"] {
 
 .btn-primary:hover {
     background-color: #5a3a9f; /* Darker shade of primary */
-}
-
-/* Cards */
-.mood-tracker,
-.journal-entry,
-.mood-history,
-.journal-history,
-.therapist-section {
-    background: var(--card-background);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
 }
 
 /* Entries List */
@@ -292,6 +358,12 @@ input[type="range"] {
     z-index: 1000;
 }
 
+.modal.show {
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+}
+
 .modal-content {
     background-color: var(--card-background);
     margin: 10% auto;
@@ -348,13 +420,30 @@ input[type="range"] {
     }
 }
 
-/* Footer */
+/* Footer Styles */
 footer {
-    text-align: center;
-    padding: 2rem;
-    background-color: var(--heading-color);
+    background-color: #333;
     color: white;
-    margin-top: 4rem;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 210px; /* Further increased space above the footer */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.goals-active footer {
+    max-width: none; /* Remove max-width constraint */
+    margin-left: 0; /* Remove auto margin */
+    margin-right: 0; /* Remove auto margin */
+    width: 100%; /* Ensure full width */
+}
+
+/* Add some responsive adjustments if needed */
+@media (max-width: 768px) {
+    footer {
+        padding: 15px 0;
+        margin-top: 30px; /* Adjust margin for smaller screens */
+    }
 }
 
 /* Responsive Design */
@@ -377,47 +466,154 @@ footer {
 }
 
 @media (min-width: 768px) {
-    .dashboard {
-        grid-template-columns: repeat(2, 1fr); /* Two columns on medium screens */
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr); /* Three columns on medium screens */
+        grid-auto-rows: minmax(250px, auto); /* Further increased auto-rows for medium screens */
+        gap: 20px; /* Ensure gap is maintained */
     }
 
-    .mood-tracker,
+    /* Position elements based on user requirements on dashboard */
+    .mood-tracker {
+        grid-column: 1; /* Mood Tracker in the first column */
+        grid-row: 1; /* Positioned in the first row */
+    }
+
     .journal-entry {
-        grid-column: span 1; /* Each takes one column */
+        grid-column: 2; /* Journal Entry in the second column */
+        grid-row: 1; /* Positioned in the first row */
+    }
+
+    #featuredGoal {
+        grid-column: 3; /* Featured Goal in the third column */
+        grid-row: 1; /* Positioned in the first row */
     }
 
     .therapist-section {
-        grid-column: span 2; /* Therapist spans two columns below the forms */
-        order: 3; /* Ensure it appears after the forms */
+        grid-column: 1 / span 3; /* AI Therapist spans all three columns */
+        grid-row: 2; /* Positioned in the second row */
     }
 
-    .mood-history,
+    .mood-history {
+        grid-column: 1 / span 2; /* Mood History spans two columns */
+        grid-row: 3; /* Positioned in the third row */
+    }
+
     .journal-history {
-        grid-column: span 1; /* Each takes one column below the therapist */
+        grid-column: 3; /* Journal History in the third column */
+        grid-row: 3; /* Positioned in the third row */
+    }
+
+    /* Goals tab content layout */
+    body.goals-active #goalsContent {
+        grid-column: span 3; /* Goals content spans full width when active */
+        display: grid; /* Ensure it's a grid container */
+        gap: 20px; /* Maintain gap within goals content */
+        grid-template-columns: repeat(3, 1fr); /* Three columns for goals content */
+        /* Remove max-width and margin-left/right that might be inherited */
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    body.goals-active #goalsContent .goals-history {
+        grid-column: 1 / span 3; /* Goals history spans all three columns */
+        grid-row: 1; /* Positioned in the first row of goals content */
+        width: 100%; /* Ensure it spans the full width */
+        position: relative; /* Ensure absolute positioning of children works */
+        padding-bottom: 60px !important; /* Increase padding to make more space for the button */
+        overflow-y: auto !important; /* Enable vertical scrolling for the goals list */
+        display: flex; /* Use flexbox for internal layout */
+        flex-direction: column; /* Stack content vertically */
+    }
+    
+    body.goals-active #goalsContent .goals-history #goalsList {
+        flex-grow: 1; /* Allow goals list to take available space */
+        overflow-y: auto; /* Enable scrolling specifically for the list if needed, might be redundant with parent */
+    }
+
+    body.goals-active #goalsContent .goals-history #addGoalBtn {
+        padding: 0.25rem 0.5rem !important; /* Reduced padding */
+        width: auto !important; /* Allow width to adjust to content */
+        position: absolute !important; /* Position relative to the parent article */
+        bottom: 10px !important; /* Distance from the bottom */
+        right: 10px !important; /* Distance from the right */
+        z-index: 10 !important; /* Ensure it's above other content if necessary */
     }
 }
 
 @media (min-width: 1024px) {
-    .dashboard {
-        grid-template-columns: repeat(3, 1fr); /* Three columns on large screens */
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px; /* Ensure gap is maintained */
     }
 
-    .mood-tracker,
+    .mood-tracker {
+        grid-column: 1; /* Mood Tracker in the first column */
+        grid-row: 1; /* Positioned in the first row */
+    }
+
     .journal-entry {
-        grid-column: span 1; /* Forms in the first two columns */
+        grid-column: 2; /* Journal Entry in the second column */
+        grid-row: 1; /* Positioned in the first row */
+    }
+
+     #featuredGoal {
+        grid-column: 3; /* Featured Goal in the third column */
+        grid-row: 1; /* Positioned in the first row */
     }
 
     .therapist-section {
-        grid-column: 3 / span 1; /* Therapist in the third column */
-        order: unset; /* Reset order */
+        grid-column: 1 / span 3; /* AI Therapist spans all three columns */
+        grid-row: 2; /* Positioned in the second row */
     }
 
     .mood-history {
-        grid-column: span 2; /* Mood history spans two columns */
+        grid-column: 1 / span 2; /* Mood History spans two columns */
+        grid-row: 3; /* Positioned in the third row */
     }
 
     .journal-history {
-        grid-column: span 1; /* Journal history spans one column */
+        grid-column: 3; /* Journal History in the third column */
+        grid-row: 3; /* Positioned in the third row */
+    }
+
+    /* Goals tab content layout */
+    body.goals-active #goalsContent {
+        grid-column: span 3; /* Goals content spans full width when active */
+        display: grid; /* Ensure it's a grid container */
+        gap: 20px; /* Maintain gap within goals content */
+        grid-template-columns: repeat(3, 1fr); /* Three columns for goals content */
+         /* Remove max-width and margin-left/right that might be inherited */
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    body.goals-active #goalsContent .goals-history {
+        grid-column: 1 / span 3; /* Goals history spans all three columns */
+        grid-row: 1; /* Positioned in the first row of goals content */
+         width: 100%; /* Ensure it spans the full width */
+         position: relative; /* Ensure absolute positioning of children works */
+         padding-bottom: 60px !important; /* Add padding to make more space for the button */
+         overflow-y: auto !important; /* Enable vertical scrolling for the goals list */
+         display: flex; /* Use flexbox for internal layout */
+         flex-direction: column; /* Stack content vertically */
+    }
+
+     body.goals-active #goalsContent .goals-history #goalsList {
+        flex-grow: 1; /* Allow goals list to take available space */
+        overflow-y: auto; /* Enable scrolling specifically for the list if needed, might be redundant with parent */
+    }
+
+     body.goals-active #goalsContent .goals-history #addGoalBtn {
+        padding: 0.25rem 0.5rem !important; /* Reduced padding */
+        width: auto !important; /* Allow width to adjust to content */
+        position: absolute !important; /* Position relative to the parent article */
+        bottom: 10px !important; /* Distance from the bottom */
+        right: 10px !important; /* Distance from the right */
+        z-index: 10 !important; /* Ensure it's above other content if necessary */
     }
 }
 
@@ -818,4 +1014,123 @@ footer {
     display: block;
     width: 100%;
     margin-top: 1.5rem;
+}
+
+.plain-background {
+    background-color: white;
+    background-image: none; /* Remove any potential background image/gradient */
+}
+
+.dashboard-card, .goal-card {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content overflow */
+    position: relative; /* Needed for absolute positioning of children */
+    /* Ensure cards stretch to fill grid cell height */
+    height: 100%;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.dashboard-card h3, .goal-card h3 {
+    margin-top: 0;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.dashboard-card p, .goal-card p {
+    color: var(--text-color-secondary);
+    line-height: 1.6;
+    flex-grow: 1; /* Allow paragraph to take available space */
+}
+
+/* Specific styling for featured goal card to encourage fullness */
+#featured-goal-section .goal-card {
+    background-color: var(--featured-goal-background);
+    border: 1px solid var(--featured-goal-border);
+    border-radius: 10px; /* Ensure consistent border-radius */
+    padding: 25px;
+    display: flex; /* Use flexbox for internal alignment */
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    text-align: center;
+    height: 100%; /* Ensure it takes full height of its grid cell */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    min-height: 220px; /* Adjusted min-height */
+}
+
+#featured-goal-section .goal-card h3 {
+    margin-top: 0;
+    color: var(--featured-goal-text-color);
+    border-bottom: 2px solid var(--featured-goal-accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    width: 100%; /* Ensure heading takes full width */
+}
+
+#featured-goal-section .goal-card .featured-goal-content {
+    color: var(--featured-goal-text-color-secondary);
+    font-size: 1.1em;
+    line-height: 1.6;
+    flex-grow: 1; /* Allow content to take available space */
+    display: flex; /* Use flexbox for centering content if needed */
+    flex-direction: column; /* Stack content vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    width: 100%; /* Ensure content block takes full width */
+}
+
+/* Styles for individual goal cards in the goals section */
+.goal-card {
+    background-color: var(--card-background); /* Background for regular goal cards */
+    border: none; /* No border for regular goal cards */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    justify-content: space-between; /* Distribute space between items */
+    box-sizing: border-box;
+}
+
+.goal-card h3 {
+    margin-top: 0;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.goal-card .goal-details {
+    flex-grow: 1;
+}
+
+.goal-card .goal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: flex-end;
+}
+
+.goal-card .goal-actions button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--button-background);
+    color: var(--button-text-color);
+    transition: background-color 0.3s ease;
+}
+
+.goal-card .goal-actions button:hover {
+    background-color: var(--button-hover-background);
 } 
