@@ -2,7 +2,7 @@ class Therapist {
     constructor() {
         this.auth = window.auth;
         this.db = window.db;
-        this.apiKey = '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'; // Replace with your actual API key
+        this.apiKey = import.meta.env.VITE_OPENAI_API_KEY; // Read from environment variable
         this.apiEndpoint = 'https://api.openai.com/v1/chat/completions';
         
         if (!this.auth || !this.db) {
