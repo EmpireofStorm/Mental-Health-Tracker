@@ -1,6 +1,11 @@
 class Auth {
     constructor() {
         console.log('Auth class initialized');
+        // Wait for Firebase to be initialized
+        if (!window.auth) {
+            console.error('Firebase auth not initialized');
+            return;
+        }
         this.auth = window.auth;
         this.currentUser = null;
         this.setupAuthListeners();

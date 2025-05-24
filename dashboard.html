@@ -229,22 +229,15 @@
     <script src="js/therapist.js"></script>
     <script src="js/goals.js"></script>
     <script>
-        // Initialize components
-        const moodTracker = new MoodTracker();
-        const journal = new Journal();
-        const therapist = new Therapist();
-        // const goals = new Goals(); // Remove global initialization
-
-        let goalsInitialized = false; // Flag to track initialization
-        let goalsInstance = null; // Store the goals instance
-
         // Script for tab switching
         document.addEventListener('DOMContentLoaded', () => {
             const tabLinks = document.querySelectorAll('.nav-tab-link');
             const sections = document.querySelectorAll('.dashboard-grid');
+            const body = document.body;
+            let goalsInstance = null;
 
             tabLinks.forEach(link => {
-                link.addEventListener('click', async (e) => { // Added async here
+                link.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const targetId = e.target.dataset.target;
 
@@ -254,44 +247,24 @@
 
                     // Hide all sections and show the target section
                     sections.forEach(section => section.classList.add('hidden'));
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) {
-                        targetSection.classList.remove('hidden');
-                    }
+                    document.getElementById(targetId).classList.remove('hidden');
 
-                    // Get the body element
-                    const body = document.body;
-
-                    // Add or remove 'goals-active' class based on the active tab
+                    // Add/remove goals-active class to body
                     if (targetId === 'goalsContent') {
                         body.classList.add('goals-active');
+                        if (!goalsInstance) {
+                            goalsInstance = new Goals();
+                        }
+                        // Get current user from auth
+                        const user = window.auth.currentUser;
+                        if (user) {
+                            await goalsInstance.activateGoalsSection(user);
+                        }
                     } else {
                         body.classList.remove('goals-active');
                     }
-
-                    // Initialize/Load Goals only when the Goals tab is clicked
-                    if (targetId === 'goalsContent') {
-                        // Get the current user using the global authManager instance
-                        const user = window.authManager ? window.authManager.getCurrentUser() : null;
-
-                        if (!goalsInitialized) {
-                            console.log('Goals tab clicked for the first time. Initializing Goals.');
-                            // Create and initialize the Goals instance
-                            goalsInstance = new Goals();
-                            goalsInstance.activateGoalsSection(user);
-                            goalsInitialized = true; // Set flag to true
-                        } else {
-                             console.log('Goals tab clicked again. Reloading goals.');
-                             // If already initialized, just reload goals using the current user state
-                             if (goalsInstance) {
-                                goalsInstance.activateGoalsSection(user);
-                             }
-                        }
-                    }
                 });
             });
-             // Ensure the initial dashboard content is visible on page load
-             document.getElementById('dashboardContent').classList.remove('hidden');
         });
     </script>
 </body>

@@ -1,9 +1,9 @@
-import { auth, db } from './config.js';
+// import { auth, db } from './config.js'; // Removed module import
 
 class Charts {
     constructor() {
-        this.db = db;
-        this.auth = auth;
+        this.db = window.db; // Access from global window
+        this.auth = window.auth; // Access from global window
         this.moodChart = null;
         if (document.getElementById('moodChart')) {
             this.setupCharts();

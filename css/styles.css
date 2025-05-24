@@ -360,26 +360,61 @@ input[type="range"] {
 
 .modal.show {
     display: flex;
-    justify-content: center; /* Center content horizontally */
-    align-items: center; /* Center content vertically */
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
-    background-color: var(--card-background);
-    margin: 10% auto;
-    padding: 2rem;
-    border-radius: var(--border-radius);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
     max-width: 500px;
     position: relative;
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.close {
+.modal .close {
     position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 1.5rem;
+    right: 15px;
+    top: 10px;
+    font-size: 24px;
     cursor: pointer;
+    color: #666;
+}
+
+.modal .close:hover {
+    color: #333;
+}
+
+.modal .form-group {
+    margin-bottom: 15px;
+}
+
+.modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.modal .form-group input,
+.modal .form-group textarea,
+.modal .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.modal .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal button[type="submit"] {
+    width: 100%;
+    margin-top: 15px;
 }
 
 /* Toast Messages */
@@ -525,6 +560,7 @@ footer {
         overflow-y: auto !important; /* Enable vertical scrolling for the goals list */
         display: flex; /* Use flexbox for internal layout */
         flex-direction: column; /* Stack content vertically */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
     }
     
     body.goals-active #goalsContent .goals-history #goalsList {
@@ -533,12 +569,13 @@ footer {
     }
 
     body.goals-active #goalsContent .goals-history #addGoalBtn {
-        padding: 0.25rem 0.5rem !important; /* Reduced padding */
-        width: auto !important; /* Allow width to adjust to content */
-        position: absolute !important; /* Position relative to the parent article */
-        bottom: 10px !important; /* Distance from the bottom */
-        right: 10px !important; /* Distance from the right */
-        z-index: 10 !important; /* Ensure it's above other content if necessary */
+        padding: 0.5rem 1rem; /* Adjusted padding for better button size */
+        width: auto; /* Allow width to adjust to content */
+        position: absolute; /* Position relative to the parent article */
+        bottom: 20px; /* Distance from the bottom */
+        right: 20px; /* Distance from the right */
+        z-index: 10; /* Ensure it's above other content if necessary */
+        margin: 0; /* Remove any default margin */
     }
 }
 
@@ -608,12 +645,13 @@ footer {
     }
 
      body.goals-active #goalsContent .goals-history #addGoalBtn {
-        padding: 0.25rem 0.5rem !important; /* Reduced padding */
-        width: auto !important; /* Allow width to adjust to content */
-        position: absolute !important; /* Position relative to the parent article */
-        bottom: 10px !important; /* Distance from the bottom */
-        right: 10px !important; /* Distance from the right */
-        z-index: 10 !important; /* Ensure it's above other content if necessary */
+        padding: 0.5rem 1rem; /* Adjusted padding for better button size */
+        width: auto; /* Allow width to adjust to content */
+        position: absolute; /* Position relative to the parent article */
+        bottom: 20px; /* Distance from the bottom */
+        right: 20px; /* Distance from the right */
+        z-index: 10; /* Ensure it's above other content if necessary */
+        margin: 0; /* Remove any default margin */
     }
 }
 
@@ -1133,4 +1171,40 @@ footer {
 
 .goal-card .goal-actions button:hover {
     background-color: var(--button-hover-background);
+}
+
+/* Specific styles for Goals tab when active */
+body.goals-active #goalsContent {
+    display: block !important; /* Override grid display */
+    width: 100% !important; /* Ensure full width */
+    max-width: none !important; /* Remove max-width constraint */
+    margin: 0 !important; /* Remove margins */
+    padding: 0 !important; /* Remove padding */
+}
+
+body.goals-active #goalsContent .goals-history {
+    width: 100% !important; /* Ensure it spans the full width */
+    position: relative !important; /* Ensure absolute positioning of children works */
+    padding: 20px !important; /* Add padding back */
+    padding-bottom: 80px !important; /* Increase padding to make more space for the button */
+    overflow-y: auto !important; /* Enable vertical scrolling for the goals list */
+    display: flex !important; /* Use flexbox for internal layout */
+    flex-direction: column !important; /* Stack content vertically */
+    box-sizing: border-box !important; /* Include padding and border in the element's total width and height */
+    min-height: calc(100vh - 100px) !important; /* Ensure it takes up most of the viewport height */
+}
+
+body.goals-active #goalsContent .goals-history #goalsList {
+    flex-grow: 1 !important; /* Allow goals list to take available space */
+    overflow-y: auto !important; /* Enable scrolling specifically for the list if needed, might be redundant with parent */
+}
+
+body.goals-active #goalsContent .goals-history #addGoalBtn {
+    padding: 0.5rem 1rem !important; /* Adjusted padding for better button size */
+    width: auto !important; /* Allow width to adjust to content */
+    position: absolute !important; /* Position relative to the parent article */
+    bottom: 20px !important; /* Distance from the bottom */
+    right: 20px !important; /* Distance from the right */
+    z-index: 10 !important; /* Ensure it's above other content if necessary */
+    margin: 0 !important; /* Remove any default margin */
 } 
