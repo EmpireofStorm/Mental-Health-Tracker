@@ -68,6 +68,20 @@ copy js\config.js.example js\config.js
 
 5. Open `js/config.js` in your code editor and replace the placeholder values (`YOUR_...`) with your actual Firebase configuration values.
 
+### OpenAI API Key Setup
+
+The AI Therapist feature requires an OpenAI API key. For security, this key is loaded from your environment variables using a `.env` file.
+
+1. Obtain an OpenAI API key from the [OpenAI website](https://platform.openai.com/account/api-keys).
+2. Create a file named `.env` in the root directory of the project (if it doesn't already exist).
+3. Add the following line to your `.env` file, replacing `YOUR_CHATGPT_API_KEY` with your actual key:
+
+```
+OPENAI_API_KEY=YOUR_CHATGPT_API_KEY
+```
+
+4. Ensure your `.env` file is listed in the `.gitignore` file to prevent it from being committed.
+
 ### Running the Application
 
 Start a local development server from the project root directory:
