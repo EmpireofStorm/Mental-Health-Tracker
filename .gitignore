@@ -1,2 +1,18 @@
-.env 
-js/config.js 
+# Dependencies
+node_modules/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Local Firebase configuration
+js/config.js
+
+# Build output
+dist/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+node_modules

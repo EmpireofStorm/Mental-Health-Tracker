@@ -126,10 +126,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Contributions are welcome! If you'd like to contribute, please fork the repository and create a pull request with your changes. Make sure your code adheres to the project's coding standards and includes appropriate tests.
 
-## 📸 Screenshots
+## Screenshots
 
-[Coming soon]
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
 
-## 🔗 Live Demo
+### Journal
+![Journal](screenshots/journal.png)
 
-[Coming soon] 
+### Visualizations
+![Mood Tracking](screenshots/visualization.png)
+
+### AI Assistant
+![AI Assistant](screenshots/ai-assistant.png)

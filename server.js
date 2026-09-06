@@ -1,10 +1,22 @@
+require('dotenv').config();
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const app = express();
 
-// OpenAI    Key
-const OPENAI_API_KEY = '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'; // Replace with your actual API key
+
+if (!OPENAI_API_KEY) {
+    console.error('Missing OPENAI_API_KEY in .env');
+    process.exit(1);
+}
+console.log(
+    "OpenAI key loaded:",
+    OPENAI_API_KEY
+        ? `${OPENAI_API_KEY.slice(0, 7)}...${OPENAI_API_KEY.slice(-4)}`
+        : "NO KEY"
+);
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
